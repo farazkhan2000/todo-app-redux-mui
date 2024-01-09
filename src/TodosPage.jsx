@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // Material UI Imports
 import Grid from '@mui/material/Grid';
@@ -12,20 +12,27 @@ import PreviewIcon from '@mui/icons-material/Preview';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import { addTodo } from './store/actions/todoActions';
+import { addTodo, deleteTodo } from './store/actions/todoActions';
 
 const TodosPage = () => {
   const dispatch = useDispatch()
 
-  const [input, setInput] = React.useState('');
+  const [input, setInput] = useState('');
+
+  const handleDelete = (todoId) => {
+    dispatch(deleteTodo(todoId))
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    setInput('')
-    if (input.trim() !== '') { // Check if the input is not empty or contains only spaces
-      dispatch(addTodo(input)); // Dispatch the action only if input is not empty
-      setInput(''); // Clear the input after dispatching
+    if (input.trim() !== '') { 
+      const newTodo = {
+        id: Date.now(),
+        todo: input,
+      }
+      dispatch(addTodo(newTodo)); 
+      setInput(''); 
     } else {
       alert('Todo cannot be empty');
     }
@@ -33,6 +40,7 @@ const TodosPage = () => {
 
   // getting todos from the store
   const todos = useSelector((todo) => todo.todoReducer);
+  console.log('todos: ', todos);
 
   return (
     <>
@@ -59,7 +67,7 @@ const TodosPage = () => {
         {/* All Added Todos */}
         {todos.map((todo) => {
             return (
-              <Grid container spacing={4}>
+              <Grid container spacing={4} key={todo.id}>
                 <Grid item xs={12} sm container>
                   <Grid item xs container direction="column" spacing={2}>
                     <Grid item xs>
@@ -67,7 +75,7 @@ const TodosPage = () => {
                         Task 1
                       </Typography>
                       <Typography variant="body2" gutterBottom>
-                        {todo}
+                        {todo.todo}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -75,10 +83,15 @@ const TodosPage = () => {
                   <IconButton aria-label="view">
                     <PreviewIcon />
                   </IconButton>
-                  <IconButton aria-label="delete">
+                  <IconButton 
+                  aria-label="edit"
+                  >
                     <EditIcon />
                   </IconButton>
-                  <IconButton aria-label="edit">
+                  <IconButton 
+                  aria-label="delete"
+                  onClick={()=> handleDelete(todo.id)}
+                  >
                     <DeleteIcon />
                   </IconButton>
                   </Grid>
